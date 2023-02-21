@@ -42,11 +42,19 @@ export default function Content() {
 
     const handleDragStart = (e, position) => {
         dragItem.current = position;
-        console.log(e.target)
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/html", e.target.parentNode);
+        e.dataTransfer.setDragImage(e.target.parentNode, 20, 20);
+        console.log(e.target.parentNode)
     }
 
     const handleDragEnter = (e, position) => {
         dragOverItem.current = position;
+    }
+
+    const handleDragOver = (e, position) => {
+        const copyListItems = [...listBoard];
+        const dragItemContent = copyListItems[dragItem.current];
     }
 
     const handleDrop = (e) => {
@@ -57,7 +65,19 @@ export default function Content() {
         dragItem.current = null;
         dragOverItem.current = null;
         setListBoard(copyListItems);
-      };
+    };
+
+    const handleDragItemStart = (e, position) => {
+
+    }
+
+    const handleDragItemEnter = () => {
+
+    }
+
+    const handleDropItem = () => {
+
+    }
 
     useEffect(() => {
         setListBoard(mockdata)

@@ -40,7 +40,8 @@ const boardStyle = {
         margin: "10px 0",
         padding: "10px",
         borderRadius: "10px",
-        transition: "transform 0.3s"
+        transition: "transform 0.3s",
+        cursor: "move",
     }
 }
 
@@ -49,26 +50,6 @@ export default function Boards(props) {
 
     return (
         <>
-            {/* <Card
-            title={board.name}
-            extra={<Button icon={<EditOutlined />} size="large" />}
-            style={{
-                width: 300,
-                cursor: "move",
-                backgroundColor: "#ebecf0"
-            }}
-            draggable
-            onDragStart={(e) => dragStart(e, index)}
-            onDragEnter={e => dragEnter(e, index)}
-            onDragEnd={e => drop(e, index)}
-            >
-                <div style={{ cursor: "default"}}>
-                    <div style={itemStyle}>{board.name}</div>
-                    <div style={itemStyle}>Card content</div>
-                    <div style={itemStyle}>Card content</div>
-                </div>
-            </Card> */}
-
             <div className="board-container" style={boardStyle.container}>
                 <div 
                     className="board-header" 
@@ -79,20 +60,26 @@ export default function Boards(props) {
                     onDragEnd={e => drop(e, index)}
                 >
                     <h4 className="board-name">
-                        {board.name}
+                        {board?.name}
                     </h4>
                     <Button icon={<EditOutlined />} size="large" />
                 </div>
                 <ul className="board-content" style={boardStyle.list}>
-                    <li className="board-item" style={boardStyle.item}>
+                    <li className="board-item" style={boardStyle.item} draggable>
                         <p className="board-item-name">
-                            Mua bán {board.name}
+                            Mua bán {board?.name}
                         </p>
                         <Button type="dashed" icon={<EditOutlined />} size="small" />
                     </li>
-                    <li className="board-item" style={boardStyle.item}>
+                    <li className="board-item" style={boardStyle.item} draggable>
                         <p className="board-item-name">
-                            Mua bán sách, truyện
+                            Mua bán sách, truyện {board?.name}
+                        </p>
+                        <Button type="dashed" icon={<EditOutlined />} size="small" />
+                    </li>
+                    <li className="board-item" style={boardStyle.item} draggable>
+                        <p className="board-item-name">
+                            Mua bán sách {board?.name}
                         </p>
                         <Button type="dashed" icon={<EditOutlined />} size="small" />
                     </li>
