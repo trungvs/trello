@@ -6,7 +6,7 @@ import {
   } from 'antd';
 import { CloseOutlined } from "@ant-design/icons";
 
-import { addTodo } from "../Boards/TodoService";
+import { addTodo } from "./TodoService";
 
 export default function AddTodo(props) {
     const { board, reload } = props
@@ -35,6 +35,7 @@ export default function AddTodo(props) {
             if (res.data.code === 200) {
                 console.log("thanh cong")
                 reload()
+                form.resetFields()
             }
         })
         .catch(err => console.log(err))

@@ -94,8 +94,8 @@ export default function Content() {
 
     const handleDragStart = (e, position) => {
         dragItem.current = position;
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/html", e.target.parentElement);
+        e.dataTransfer.dropEffect = "move";
+        e.dataTransfer.getData("text/html", e.target.parentElement);
         e.dataTransfer.setDragImage(e.target.parentNode, 20, 20);
         console.log(e.target.parentNode)
     }
@@ -133,7 +133,7 @@ export default function Content() {
     useEffect(() => {
         getAllBoard()
         .then(res => {
-            setListBoard(res.data.data.boards)
+            setListBoard(res.data.data)
         })
         .catch(err => console.log(err))
     }, [reload])
