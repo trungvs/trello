@@ -2,8 +2,11 @@ import React, { useRef, useEffect } from "react";
 import { Card } from 'antd';
 import { Button } from 'antd';
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import AddTodo from "../HelperComponents/AddTodo";
+import { Menu } from 'antd';
+
+import AddTodo from "../Todo/AddTodo";
 import EditNameTodo from "../HelperComponents/EditNameTodo";
+import EditTodo from "../Todo/EditTodo";
 
 import { deleteBoard } from "./BoardServices";
 
@@ -50,6 +53,7 @@ const boardStyle = {
     }
 }
 
+
 export default function Boards(props) {
     const {board, index, dragStart, dragEnter, drop, dragItemStart, dragItemEnter, dropItem, reload } = props
 
@@ -80,19 +84,19 @@ export default function Boards(props) {
                         <EditNameTodo
                         nameTodo={board?.name}
                         id={board?.id}
-                        reload={reload} />
+                        reload={() => reload()} />
                     </h4>
-                    <Button icon={<DeleteOutlined />} size="large" onClick={handleDeleteBoard} />
+                    <Button icon={<DeleteOutlined />} size="medium" onClick={handleDeleteBoard} />
                 </div>
                 <ul className="board-content" style={boardStyle.list}>
                     {
                         board?.lists && board.lists.map(todo => (
-                            <li className="board-item" style={boardStyle.item} key={todo.id} draggable onDragStart={(e) => dragItemStart()}>
-                            <p className="board-item-name">
-                                {todo.name}
-                            </p>
-                            <Button type="dashed" icon={<EditOutlined />} size="small" />
-                            </li>
+                            <EditTodo
+                            key={todo.id}
+                            todo={todo}
+                            boardStyle={boardStyle}
+                            reload={reload}
+                             />
                         ))
                     }
                 </ul>
