@@ -1,27 +1,79 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Card, Space } from 'antd';
 import Boards from "../Boards/Boards";
+import AddBoard from "../Boards/AddBoard";
+
+import { getAllBoard } from "../Boards/BoardServices";
 
 export default function Content() {
     const [listBoard, setListBoard] = useState([])
     const dragItem = useRef()
     const dragOverItem = useRef()
+    const [reload, setReload] = useState(false)
 
     const mockdata = [
         {
             id: 1,
             name: "Máy tính",
-            order: 1
+            order: 1,
+            lists: [
+                {
+                    id: 900,
+                    name: "Máy tính laptop",
+                    order: 1,
+                    board_id: 1
+                },
+                {
+                    id: 901,
+                    name: "Máy tính bàn",
+                    order: 2,
+                    board_id: 1
+                }
+            ]
         },
         {
             id: 2,
             name: "Điện thoại",
-            order: 2
+            order: 2,
+            lists: [
+                {
+                    id: 1001,
+                    name: "Điện thoại cá nhân",
+                    order: 1,
+                    board_id: 2
+                },
+                {
+                    id: 1002,
+                    name: "Điện thoại bàn",
+                    order: 2,
+                    board_id: 2
+                },
+                {
+                    id: 1003,
+                    name: "Điện thoại di động",
+                    order: 3,
+                    board_id: 2
+                }
+            ]
         },
         {
             id: 3,
             name: "Tivi",
-            order: 3
+            order: 3,
+            lists: [
+                {
+                    id: 501,
+                    name: "tivi samsung",
+                    order: 1,
+                    board_id: 3
+                },
+                {
+                    id: 502,
+                    name: "tivi xiaomi",
+                    order: 2,
+                    board_id: 3
+                }
+            ]
         },
         {
             id: 4,
@@ -43,18 +95,13 @@ export default function Content() {
     const handleDragStart = (e, position) => {
         dragItem.current = position;
         e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/html", e.target.parentNode);
+        e.dataTransfer.setData("text/html", e.target.parentElement);
         e.dataTransfer.setDragImage(e.target.parentNode, 20, 20);
         console.log(e.target.parentNode)
     }
 
     const handleDragEnter = (e, position) => {
         dragOverItem.current = position;
-    }
-
-    const handleDragOver = (e, position) => {
-        const copyListItems = [...listBoard];
-        const dragItemContent = copyListItems[dragItem.current];
     }
 
     const handleDrop = (e) => {
@@ -71,7 +118,7 @@ export default function Content() {
 
     }
 
-    const handleDragItemEnter = () => {
+    const handleDragItemEnter = (e, position) => {
 
     }
 
@@ -79,17 +126,23 @@ export default function Content() {
 
     }
 
+    const handleReload = () => {
+        setReload(!reload)
+    }
+
     useEffect(() => {
-        setListBoard(mockdata)
-    }, [])
+        getAllBoard()
+        .then(res => {
+            setListBoard(res.data.data.boards)
+        })
+        .catch(err => console.log(err))
+    }, [reload])
 
     return (
         <>
-        <Space direction="horizontal" size={16}>
+        <Space direction="horizontal" size={16} style={{display: "flex", alignItems: "flex-start", marginTop: "30px"}}>
             {
-                listBoard.length === 0 
-                ? <b>EMPTY DATA</b>
-                : listBoard.map((board, index) => {
+                listBoard && listBoard.map((board, index) => {
 
                     return (
                         <Boards
@@ -99,10 +152,15 @@ export default function Content() {
                         dragStart={handleDragStart}
                         dragEnter={handleDragEnter}
                         drop={handleDrop} 
+                        dragItemStart={handleDragItemStart}
+                        dragItemEnter={handleDragItemEnter}
+                        dropItem={handleDropItem}
+                        reload={handleReload}
                         />
                     )
                 })
             }
+            <AddBoard reload={handleReload} />
         </Space>
         </>
     )

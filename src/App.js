@@ -19,7 +19,10 @@ const contentStyle = {
   padding: "0 10px",
   height: maxHeight,
   backgroundColor: '#fff',
-  overflow: "scroll"
+  overflow: "scroll",
+  display: "flex",
+  alignItems: "flex-start"
+  
 };
 const siderStyle = {
   textAlign: 'center',
@@ -40,6 +43,8 @@ function App() {
     direction="vertical"
     style={{
       width: '100%',
+      // display: "flex",
+      // alignItems: "flex-start"
     }}
     size={[0, 48]}
   >

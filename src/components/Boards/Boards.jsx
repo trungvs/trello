@@ -1,7 +1,11 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { Card } from 'antd';
 import { Button } from 'antd';
-import { EditOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import AddTodo from "../HelperComponents/AddTodo";
+import EditNameTodo from "../HelperComponents/EditNameTodo";
+
+import { deleteBoard } from "./BoardServices";
 
 const itemStyle = {
     backgroundColor: "#fff",
@@ -14,10 +18,10 @@ const boardStyle = {
     container: {
         width: "300px",
         backgroundColor: "#ebecf0",
-        marginTop: "30px",
+        // marginTop: "30px",
         borderRadius: "10px",
         padding: "10px",
-        transition: "transform 0.3s"
+        transition: "transform 0.3s",
     },
     header: {
         display: "flex",
@@ -29,7 +33,8 @@ const boardStyle = {
         transition: "transform 0.3s"
     },
     list: {
-        listStyle: "none"
+        listStyle: "none",
+        marginTop: "10px"
     },
     item: {
         backgroundColor: "#fff",
@@ -46,7 +51,18 @@ const boardStyle = {
 }
 
 export default function Boards(props) {
-    const {board, index, dragStart, dragEnter, drop} = props
+    const {board, index, dragStart, dragEnter, drop, dragItemStart, dragItemEnter, dropItem, reload } = props
+
+    const handleDeleteBoard = () => {
+        deleteBoard(board.id)
+        .then(res => {
+            if (res.data.code === 200) {
+                console.log("thanh cong")
+                reload()
+            }
+        })
+        .catch(err => console.log(err))
+    }
 
     return (
         <>
@@ -58,32 +74,34 @@ export default function Boards(props) {
                     onDragStart={(e) => dragStart(e, index)}
                     onDragEnter={e => dragEnter(e, index)}
                     onDragEnd={e => drop(e, index)}
+
                 >
-                    <h4 className="board-name">
-                        {board?.name}
+                    <h4 className="board-name" style={{ width: "80%" }}>
+                        <EditNameTodo
+                        nameTodo={board?.name}
+                        id={board?.id}
+                        reload={reload} />
                     </h4>
-                    <Button icon={<EditOutlined />} size="large" />
+                    <Button icon={<DeleteOutlined />} size="large" onClick={handleDeleteBoard} />
                 </div>
                 <ul className="board-content" style={boardStyle.list}>
-                    <li className="board-item" style={boardStyle.item} draggable>
-                        <p className="board-item-name">
-                            Mua bán {board?.name}
-                        </p>
-                        <Button type="dashed" icon={<EditOutlined />} size="small" />
-                    </li>
-                    <li className="board-item" style={boardStyle.item} draggable>
-                        <p className="board-item-name">
-                            Mua bán sách, truyện {board?.name}
-                        </p>
-                        <Button type="dashed" icon={<EditOutlined />} size="small" />
-                    </li>
-                    <li className="board-item" style={boardStyle.item} draggable>
-                        <p className="board-item-name">
-                            Mua bán sách {board?.name}
-                        </p>
-                        <Button type="dashed" icon={<EditOutlined />} size="small" />
-                    </li>
+                    {
+                        board?.lists && board.lists.map(todo => (
+                            <li className="board-item" style={boardStyle.item} key={todo.id} draggable onDragStart={(e) => dragItemStart()}>
+                            <p className="board-item-name">
+                                {todo.name}
+                            </p>
+                            <Button type="dashed" icon={<EditOutlined />} size="small" />
+                            </li>
+                        ))
+                    }
                 </ul>
+                <AddTodo
+                board={board}
+                reload={reload} />
+                {/* <Button type="dashed" block size="large">
+                    Thêm mới
+                </Button> */}
             </div>
         </>
     )
