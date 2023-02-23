@@ -21,3 +21,7 @@ export const editBoard = (id, value) => {
     return axios.put(url, value)
 }
 
+export const rankBoard = (id, value) => {
+    let url = API_ENDPOINT + `/rank/${id}`
+    return axios.put(url, value)
+}

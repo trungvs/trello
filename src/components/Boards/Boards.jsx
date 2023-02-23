@@ -46,7 +46,7 @@ const boardStyle = {
         alignItems: "center",
         width: "100%",
         margin: "10px 0",
-        padding: "10px",
+        // padding: "10px",
         borderRadius: "10px",
         transition: "transform 0.3s",
         cursor: "move",
@@ -70,7 +70,7 @@ export default function Boards(props) {
 
     return (
         <>
-            <div className="board-container" style={boardStyle.container}>
+            <div className="board-container" style={boardStyle.container} data-value={board.id} ranking={board.no}>
                 <div 
                     className="board-header" 
                     style={boardStyle.header}
