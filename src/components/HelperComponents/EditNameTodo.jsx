@@ -29,11 +29,6 @@ export default function EditNameTodo(props) {
         .catch(err => console.log(err))
     }
 
-    document.addEventListener("click", (e) => {
-        if (e.target.contains(inputRef?.current?.input) && e.target !== inputRef?.current?.input) {
-            handleSubmit()
-        }
-    })
 
     useEffect(() => {
         // if (setIsEdit) {
@@ -49,7 +44,7 @@ export default function EditNameTodo(props) {
                 if (e.key === "Enter") {
                   handleSubmit(form.values)
                 }
-              }} >
+              }} onBlur={() => handleSubmit(form.values)}>
             <Form.Item name="name" style={{ marginBottom: 0}} rules={[
             {
                 required: true,

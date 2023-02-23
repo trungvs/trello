@@ -3,13 +3,17 @@ import { Card, Space } from 'antd';
 import Boards from "../Boards/Boards";
 import AddBoard from "../Boards/AddBoard";
 
-import { getAllBoard } from "../Boards/BoardServices";
+import { getAllBoard, rankBoard } from "../Boards/BoardServices";
 
 export default function Content() {
     const [listBoard, setListBoard] = useState([])
     const dragItem = useRef()
     const dragOverItem = useRef()
     const [reload, setReload] = useState(false)
+
+    const [currentRanking, setCurrentRanking] = useState(null)
+    const [newRanking, setNewRanking] = useState(null)
+    const [itemSelected, setItemSelected] = useState(null)
 
     const mockdata = [
         {
@@ -95,23 +99,34 @@ export default function Content() {
     const handleDragStart = (e, position) => {
         dragItem.current = position;
         e.dataTransfer.dropEffect = "move";
-        e.dataTransfer.getData("text/html", e.target.parentElement);
+        e.dataTransfer.setData("text/html", e.target.parentElement);
         e.dataTransfer.setDragImage(e.target.parentNode, 20, 20);
-        console.log(e.target.parentNode)
+        setCurrentRanking(e.target.parentNode.getAttribute("ranking"))
+        setItemSelected(e.target.parentNode.getAttribute("data-value"))
     }
 
     const handleDragEnter = (e, position) => {
         dragOverItem.current = position;
+        setNewRanking(e.target.parentNode.getAttribute("ranking") || e.target.parentNode.parentNode.parentNode.getAttribute("ranking"))
     }
 
     const handleDrop = (e) => {
-        const copyListItems = [...listBoard];
-        const dragItemContent = copyListItems[dragItem.current];
-        copyListItems.splice(dragItem.current, 1);
-        copyListItems.splice(dragOverItem.current, 0, dragItemContent); 
-        dragItem.current = null;
-        dragOverItem.current = null;
-        setListBoard(copyListItems);
+        if (newRanking !== null) {
+            const copyListItems = [...listBoard];
+            const dragItemContent = copyListItems[dragItem.current];
+            copyListItems.splice(dragItem.current, 1);
+            copyListItems.splice(dragOverItem.current, 0, dragItemContent); 
+            dragItem.current = null;
+            dragOverItem.current = null;
+            setListBoard(copyListItems);
+            rankBoard(itemSelected, {currentRanking, newRanking})
+            .then(res => {
+                if (res.data.code === 200) {
+                    handleReload()
+                }
+            })
+            .catch(err => console.log(err))
+        }
     };
 
     const handleDragItemStart = (e, position) => {
@@ -146,7 +161,7 @@ export default function Content() {
 
                     return (
                         <Boards
-                        key={index}
+                        key={board.id}
                         board={board}
                         index={index}
                         dragStart={handleDragStart}

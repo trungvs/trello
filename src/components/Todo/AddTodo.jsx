@@ -52,7 +52,7 @@ export default function AddTodo(props) {
                     message: 'Trường này là bắt buộc!'
                 }
                 ]}>
-                    <Input.TextArea allowClear onChange={(e) => setContent(e.target.value)} />
+                    <Input.TextArea allowClear autoFocus onChange={(e) => setContent(e.target.value)} />
                 </Form.Item>
                     <Button type="primary" htmlType="submit" size="large" onClick={() => setOpenEdit(true)} style={{ marginRight: "10px" }}>
                     Thêm mới

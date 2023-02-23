@@ -18,3 +18,13 @@ export const editTodo = (id, value) => {
     let url = API_ENDPOINT + `/${id}`
     return axios.put(url, value)
 }
+
+export const deleteTodo = (id) => {
+    let url = API_ENDPOINT + `/${id}`
+    return axios.delete(url)
+}
+
+export const rankTodo = (id, value) => {
+    let url = API_ENDPOINT + `/${id}`
+    return axios.put(url, value)
+}
