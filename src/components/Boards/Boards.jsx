@@ -55,7 +55,7 @@ const boardStyle = {
 
 
 export default function Boards(props) {
-    const {board, index, dragStart, dragEnter, drop, dragItemStart, dragItemEnter, dropItem, reload } = props
+    const {board, index, dragStart, dragEnter, drop, dragItemStart, dragItemEnter, dropItem, reload, handleSetNew } = props
 
     const handleDeleteBoard = () => {
         deleteBoard(board.id)
@@ -96,6 +96,7 @@ export default function Boards(props) {
                             todo={todo}
                             boardStyle={boardStyle}
                             reload={reload}
+                            handleSetNew={handleSetNew}
                              />
                         ))
                     }
@@ -103,9 +104,6 @@ export default function Boards(props) {
                 <AddTodo
                 board={board}
                 reload={reload} />
-                {/* <Button type="dashed" block size="large">
-                    Thêm mới
-                </Button> */}
             </div>
         </>
     )
