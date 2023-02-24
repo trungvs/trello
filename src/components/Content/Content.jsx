@@ -129,18 +129,6 @@ export default function Content() {
         }
     };
 
-    const handleDragItemStart = (e, position) => {
-
-    }
-
-    const handleDragItemEnter = (e, position) => {
-
-    }
-
-    const handleDropItem = () => {
-
-    }
-
     const handleReload = () => {
         setReload(!reload)
     }
@@ -152,6 +140,23 @@ export default function Content() {
         })
         .catch(err => console.log(err))
     }, [reload])
+
+    const handleSetNew = (itemSelected, currentRanking, newRanking, newBoard) => {
+        console.log(itemSelected)
+        if (itemSelected?.board_id === newBoard) {
+            if (currentRanking > newRanking) {
+                let listSelected = listBoard.filter(list => list.id === newBoard)
+                let listTodos = listSelected.lists[0]
+                listTodos = listTodos.map(todo => todo.no >= newRanking ? {...todo, no: todo.no +1} : todo)
+                listTodos = listTodos.map(todo => todo.id === itemSelected.id ? {...todo, no: newRanking} : todo)
+                listSelected = {
+                    ...listSelected,
+                    lists: listTodos
+                }
+                setListBoard(listBoard.map(board => board.id === listSelected.id ? listSelected : board))
+            }
+        }
+    }   
 
     return (
         <>
@@ -167,10 +172,8 @@ export default function Content() {
                         dragStart={handleDragStart}
                         dragEnter={handleDragEnter}
                         drop={handleDrop} 
-                        dragItemStart={handleDragItemStart}
-                        dragItemEnter={handleDragItemEnter}
-                        dropItem={handleDropItem}
                         reload={handleReload}
+                        handleSetNew={handleSetNew}
                         />
                     )
                 })

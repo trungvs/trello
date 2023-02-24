@@ -25,6 +25,6 @@ export const deleteTodo = (id) => {
 }
 
 export const rankTodo = (id, value) => {
-    let url = API_ENDPOINT + `/${id}`
+    let url = API_ENDPOINT + `/rank/${id}`
     return axios.put(url, value)
 }

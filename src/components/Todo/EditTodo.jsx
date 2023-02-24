@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import {
     Form,
     Input,
@@ -8,7 +8,7 @@ import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 import { editTodo, deleteTodo, rankTodo } from "./TodoService"
 
-export default function EditTodo({ todo, boardStyle, reload }) {
+export default function EditTodo({ todo, boardStyle, reload, handleSetNew }) {
     const [isEdit, setIsEdit] = useState(false)
 
     const [form] = Form.useForm()
@@ -16,6 +16,9 @@ export default function EditTodo({ todo, boardStyle, reload }) {
     const [currentRanking, setCurrentRanking] = useState(null)
     const [newRanking, setNewRanking] = useState(null)
     const [newBoard, setNewBoard] = useState(null)
+
+    const dragItem = useRef()
+    const dragOverItem = useRef()
 
     const handleSubmit = () => {
         setIsEdit(false)
@@ -38,30 +41,39 @@ export default function EditTodo({ todo, boardStyle, reload }) {
         .catch(err => console.log(err))
     }
 
-    const handleDragStart = (e) => {
-        setItemSelected(e.target.getAttribute("data-value") || e.target.parentNode.getAttribute("data-value"))
-        setCurrentRanking(e.target.getAttribute("ranking") || e.target.parentNode.getAttribute("ranking"))
-        console.log("start", e.target.getAttribute("data-value") || e.target.parentNode.getAttribute("data-value"))
+    const handleDragStart = (e, todo) => {
+        setItemSelected(todo)
+        setCurrentRanking(todo.no)
+        console.log("start", todo.id, todo.no)
     }
 
-    const handleDragEnter = (e) => {
-        setNewRanking(e.target.getAttribute("ranking") || e.target.parentNode.getAttribute("ranking"))
-        setNewBoard(e.target.parentNode.getAttribute("board-id"))
-        console.log(e.target.getAttribute("ranking") || e.target.parentNode.getAttribute("ranking"))
+    const handleDragEnter = (e, todo) => {
+        // setNewRanking(e.target.getAttribute("ranking") || e.target.parentNode.getAttribute("ranking"))
+        // setNewBoard(e.target.parentNode.getAttribute("board-id"))
+        // setNewRanking(todo.no)
+        setNewBoard(todo.board_id)
+        console.log("enter", dragOverItem.current, newBoard)
+        dragOverItem.current = todo.no
     }
 
     const handleDrop = (e) => {
-        rankTodo(itemSelected, {
-        currentRanking,
-        newRanking,
-        board_id: newBoard
-        })  
-        .then(res => {
-            if (res.data.code === 200) {
-                reload()
-            }
-        })
-        .catch(err => console.log(err))
+        e.preventDefault()
+        console.log(itemSelected.id, currentRanking, dragOverItem.current, newBoard)
+        console.log(itemSelected?.board_id, newBoard)
+        if (itemSelected?.board_id === newBoard) {
+            console.log("khac ne")
+        }
+        // rankTodo(itemSelected, {
+        // currentRanking,
+        // newRanking,
+        // board_id: newBoard
+        // })  
+        // .then(res => {
+        //     if (res.data.code === 200) {
+        //         reload()
+        //     }
+        // })
+        // .catch(err => console.log(err))
     }
 
     return (
@@ -96,9 +108,9 @@ export default function EditTodo({ todo, boardStyle, reload }) {
                 ranking={todo.no}
                 board-id={todo.board_id}
                 draggable
-                onDragStart={handleDragStart}
-                onDragEnter={handleDragEnter}
-                onDragEnd={handleDrop}
+                onDragStart={(e) => handleDragStart(e, todo)}
+                onDragEnter={(e) => handleDragEnter(e, todo)}
+                onDragEnd={(e) => handleDrop(e, todo.no)}
             >
                 <p className="board-item-name" style={{ padding: "10px", width: "100%"}} onClick={() => setIsEdit(true)}>
                     {todo.name}
