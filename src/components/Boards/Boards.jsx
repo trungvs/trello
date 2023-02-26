@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Card } from 'antd';
 import { Button } from 'antd';
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
@@ -25,6 +25,8 @@ const boardStyle = {
         borderRadius: "10px",
         padding: "10px",
         transition: "transform 0.3s",
+        position: "relative",
+        zIndex: 1
     },
     header: {
         display: "flex",
@@ -32,7 +34,7 @@ const boardStyle = {
         justifyContent: "space-between",
         alignItems: "center",
         height: "40px",
-        cursor: "move",
+        cursor: "grab",
         transition: "transform 0.3s"
     },
     list: {
@@ -46,22 +48,30 @@ const boardStyle = {
         alignItems: "center",
         width: "100%",
         margin: "10px 0",
-        // padding: "10px",
+        padding: "10px",
         borderRadius: "10px",
         transition: "transform 0.3s",
-        cursor: "move",
+        cursor: "grab",
     }
 }
 
-
 export default function Boards(props) {
-    const {board, index, dragStart, dragEnter, drop, dragItemStart, dragItemEnter, dropItem, reload } = props
+    const {
+        board, 
+        index, 
+        dragStart, 
+        dragEnter, 
+        drop, 
+        reload, 
+        handleDragItemStart, 
+        handleDragItemEnter, 
+        handleDragItemEnd 
+    } = props
 
     const handleDeleteBoard = () => {
         deleteBoard(board.id)
         .then(res => {
             if (res.data.code === 200) {
-                console.log("thanh cong")
                 reload()
             }
         })
@@ -70,15 +80,14 @@ export default function Boards(props) {
 
     return (
         <>
-            <div className="board-container" style={boardStyle.container} data-value={board.id} ranking={board.no}>
+            <div style={boardStyle.container} data-value={board.id} ranking={board.no}>
                 <div 
                     className="board-header" 
                     style={boardStyle.header}
                     draggable
                     onDragStart={(e) => dragStart(e, index)}
-                    onDragEnter={e => dragEnter(e, index)}
+                    onDragEnter={e => dragEnter(e, index, board.id)}
                     onDragEnd={e => drop(e, index)}
-
                 >
                     <h4 className="board-name" style={{ width: "80%" }}>
                         <EditNameTodo
@@ -90,12 +99,15 @@ export default function Boards(props) {
                 </div>
                 <ul className="board-content" style={boardStyle.list}>
                     {
-                        board?.lists && board.lists.map(todo => (
+                        board?.lists && board.lists.sort((a,b) => a.no - b.no).map(todo => (
                             <EditTodo
                             key={todo.id}
                             todo={todo}
                             boardStyle={boardStyle}
                             reload={reload}
+                            onDragStart={handleDragItemStart}
+                            onDragEnter={handleDragItemEnter}
+                            onDragEnd={handleDragItemEnd}
                              />
                         ))
                     }
@@ -103,9 +115,6 @@ export default function Boards(props) {
                 <AddTodo
                 board={board}
                 reload={reload} />
-                {/* <Button type="dashed" block size="large">
-                    Thêm mới
-                </Button> */}
             </div>
         </>
     )
