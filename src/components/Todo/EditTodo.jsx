@@ -8,14 +8,19 @@ import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 import { editTodo, deleteTodo, rankTodo } from "./TodoService"
 
-export default function EditTodo({ todo, boardStyle, reload, handleSetNew }) {
+export default function EditTodo(props) {
+    const { 
+        todo, 
+        boardStyle, 
+        reload, 
+        onDragStart, 
+        onDragEnter, 
+        onDragEnd 
+    } = props
+
     const [isEdit, setIsEdit] = useState(false)
 
     const [form] = Form.useForm()
-    const [itemSelected, setItemSelected] = useState(null)
-    const [currentRanking, setCurrentRanking] = useState(null)
-    const [newRanking, setNewRanking] = useState(null)
-    const [newBoard, setNewBoard] = useState(null)
 
     const dragItem = useRef()
     const dragOverItem = useRef()
@@ -41,41 +46,6 @@ export default function EditTodo({ todo, boardStyle, reload, handleSetNew }) {
         .catch(err => console.log(err))
     }
 
-    const handleDragStart = (e, todo) => {
-        setItemSelected(todo)
-        setCurrentRanking(todo.no)
-        console.log("start", todo.id, todo.no)
-    }
-
-    const handleDragEnter = (e, todo) => {
-        // setNewRanking(e.target.getAttribute("ranking") || e.target.parentNode.getAttribute("ranking"))
-        // setNewBoard(e.target.parentNode.getAttribute("board-id"))
-        // setNewRanking(todo.no)
-        setNewBoard(todo.board_id)
-        console.log("enter", dragOverItem.current, newBoard)
-        dragOverItem.current = todo.no
-    }
-
-    const handleDrop = (e) => {
-        e.preventDefault()
-        console.log(itemSelected.id, currentRanking, dragOverItem.current, newBoard)
-        console.log(itemSelected?.board_id, newBoard)
-        if (itemSelected?.board_id === newBoard) {
-            console.log("khac ne")
-        }
-        // rankTodo(itemSelected, {
-        // currentRanking,
-        // newRanking,
-        // board_id: newBoard
-        // })  
-        // .then(res => {
-        //     if (res.data.code === 200) {
-        //         reload()
-        //     }
-        // })
-        // .catch(err => console.log(err))
-    }
-
     return (
         <>
         {
@@ -97,7 +67,7 @@ export default function EditTodo({ todo, boardStyle, reload, handleSetNew }) {
                 ]}
                 initialValue={todo.name}
             >
-                <Input.TextArea size="large" autoFocus/>
+                <Input.TextArea size="small" autoFocus onFocus={e => e.target.setSelectionRange(e.currentTarget.value.length, e.currentTarget.value.length)}/>
                 </Form.Item>
             </Form>
             : <li 
@@ -108,14 +78,15 @@ export default function EditTodo({ todo, boardStyle, reload, handleSetNew }) {
                 ranking={todo.no}
                 board-id={todo.board_id}
                 draggable
-                onDragStart={(e) => handleDragStart(e, todo)}
-                onDragEnter={(e) => handleDragEnter(e, todo)}
-                onDragEnd={(e) => handleDrop(e, todo.no)}
+                onDragStart={(e) => onDragStart(e, todo.id, todo.no)}
+                onDragEnter={(e) => onDragEnter(e, todo.no, todo.board_id)}
+                onDragEnd={(e) => onDragEnd(e, todo.no, todo.board_id)}
+
             >
-                <p className="board-item-name" style={{ padding: "10px", width: "100%"}} onClick={() => setIsEdit(true)}>
+                <p className="board-item-name" style={{width: "100%"}} onClick={() => setIsEdit(true)}>
                     {todo.name}
                 </p>
-            <Button type="dashed" icon={<DeleteOutlined />} size="small" style={{ marginRight: "10px"}} onClick={() => handleDeleteTodo(todo.id)}/>
+            <Button type="dashed" icon={<DeleteOutlined />} size="small" onClick={() => handleDeleteTodo(todo.id)}/>
             </li>
         }
         </>

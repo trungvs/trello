@@ -14,8 +14,6 @@ export default function EditNameTodo(props) {
     const [isEdit, setIsEdit] = useState(false)
     const [inputRef, setInputRef] = useState(useRef())
 
-    // const inputRef = useRef()
-
     const [form] = Form.useForm()
     const handleSubmit = (values) => {
         setIsEdit(false)
@@ -53,7 +51,7 @@ export default function EditNameTodo(props) {
             ]}
             initialValue={nameTodo}
             >
-                <Input size="large" autoFocus ref={inputRef}/>
+                <Input size="large" autoFocus ref={inputRef} onFocus={e => e.target.setSelectionRange(e.currentTarget.value.length, e.currentTarget.value.length)} />
             </Form.Item>
                 </Form>
             : <span style={{ display: "block", width: "100%" }} onClick={() => {

@@ -16,16 +16,6 @@ export default function AddTodo(props) {
 
     const [form] = Form.useForm()
 
-    const config = {
-        rules: [
-          {
-            type: 'string',
-            required: true,
-            message: 'Trường này là bắt buộc!',
-          },
-        ],
-      };
-
     const handleSubmit = (values) => {
         addTodo({
             board_id: board.id,
@@ -45,7 +35,7 @@ export default function AddTodo(props) {
         <>
         {
             openEdit
-            ? <Form onFinish={handleSubmit} form={form}>
+            ? <Form onFinish={handleSubmit} form={form} >
                 <Form.Item name="content" style={{ marginBottom: "10px" }} rules={[
                 {
                     required: true,
