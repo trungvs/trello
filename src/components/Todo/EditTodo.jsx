@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import {
     Form,
     Input,
@@ -21,6 +21,9 @@ export default function EditTodo(props) {
     const [isEdit, setIsEdit] = useState(false)
 
     const [form] = Form.useForm()
+
+    const dragItem = useRef()
+    const dragOverItem = useRef()
 
     const handleSubmit = () => {
         setIsEdit(false)
@@ -78,6 +81,7 @@ export default function EditTodo(props) {
                 onDragStart={(e) => onDragStart(e, todo.id, todo.no)}
                 onDragEnter={(e) => onDragEnter(e, todo.no, todo.board_id)}
                 onDragEnd={(e) => onDragEnd(e, todo.no, todo.board_id)}
+
             >
                 <p className="board-item-name" style={{width: "100%"}} onClick={() => setIsEdit(true)}>
                     {todo.name}

@@ -108,6 +108,7 @@ export default function Boards(props) {
                             onDragStart={handleDragItemStart}
                             onDragEnter={handleDragItemEnter}
                             onDragEnd={handleDragItemEnd}
+
                              />
                         ))
                     }
