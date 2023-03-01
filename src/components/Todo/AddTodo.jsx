@@ -9,23 +9,25 @@ import { CloseOutlined } from "@ant-design/icons";
 import { addTodo } from "./TodoService";
 
 export default function AddTodo(props) {
-    const { board, reload } = props
+    const { board, reload, handleAddTodo } = props
 
     const [openEdit, setOpenEdit] = useState(false)
-    const [content, setContent] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
 
     const [form] = Form.useForm()
 
     const handleSubmit = (values) => {
+        setIsLoading(true)
         addTodo({
             board_id: board.id,
             name: form.getFieldValue("content")
         })
         .then(res => {
             if (res.data.code === 200) {
-                console.log("thanh cong")
-                reload()
+                console.log("thanh cong add todo")
+                handleAddTodo(res.data.data)
                 form.resetFields()
+                setIsLoading(false)
             }
         })
         .catch(err => console.log(err))
@@ -42,9 +44,9 @@ export default function AddTodo(props) {
                     message: 'Trường này là bắt buộc!'
                 }
                 ]}>
-                    <Input.TextArea allowClear autoFocus onChange={(e) => setContent(e.target.value)} />
+                    <Input.TextArea allowClear autoFocus />
                 </Form.Item>
-                    <Button type="primary" htmlType="submit" size="large" onClick={() => setOpenEdit(true)} style={{ marginRight: "10px" }}>
+                    <Button type="primary" htmlType="submit" size="large" onClick={() => setOpenEdit(true)} style={{ marginRight: "10px" }} disabled={isLoading}>
                     Thêm mới
                     </Button>
                     <Button type="dashed" shape="circle" size="large" onClick={() => setOpenEdit(false)}>

@@ -5,14 +5,15 @@ import {
     Input,
   } from 'antd';
 
-  import { editBoard } from "../Boards/BoardServices";
+  import { editBoard } from "./BoardServices";
 
-export default function EditNameTodo(props) {
-    const { id, nameTodo, reload } = props
+export default function EditBoardName(props) {
+    const { id, nameTodo, reload, setBoardName } = props
 
     const [render, setRender] = useState(false)
     const [isEdit, setIsEdit] = useState(false)
     const [inputRef, setInputRef] = useState(useRef())
+    const [name, setName] = useState("")
 
     const [form] = Form.useForm()
     const handleSubmit = (values) => {
@@ -20,19 +21,15 @@ export default function EditNameTodo(props) {
         editBoard(id, { name: form.getFieldValue("name")})
         .then(res => {
             if (res.data.code === 200) {
-                reload()
-                console.log("thanh cong")
+                setName(res.data.data.name)
             }
         })
         .catch(err => console.log(err))
     }
 
-
     useEffect(() => {
-        // if (setIsEdit) {
-        //     setInputRef(inputRef?.current)
-        // }
-    }, [render])
+        setName(nameTodo)
+    }, [])
 
     return (
         <>
@@ -49,7 +46,7 @@ export default function EditNameTodo(props) {
                 message: 'Trường này là bắt buộc!'
             }
             ]}
-            initialValue={nameTodo}
+            initialValue={name}
             >
                 <Input size="large" autoFocus ref={inputRef} onFocus={e => e.target.setSelectionRange(e.currentTarget.value.length, e.currentTarget.value.length)} />
             </Form.Item>
@@ -57,7 +54,7 @@ export default function EditNameTodo(props) {
             : <span style={{ display: "block", width: "100%" }} onClick={() => {
                 setIsEdit(true)
                 // setRender(!render)
-            }}>{nameTodo}</span>
+            }}>{name}</span>
         }
         </>
     )

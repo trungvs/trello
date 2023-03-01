@@ -1,21 +1,14 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Card } from 'antd';
+import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { Button } from 'antd';
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Menu } from 'antd';
+import { DeleteOutlined } from "@ant-design/icons";
 
 import AddTodo from "../Todo/AddTodo";
-import EditNameTodo from "../HelperComponents/EditNameTodo";
-import EditTodo from "../Todo/EditTodo";
+import EditNameTodo from "./EditBoardName";
 
 import { deleteBoard } from "./BoardServices";
-
-const itemStyle = {
-    backgroundColor: "#fff",
-    marginBottom: "5px",
-    padding: "5px",
-    borderRadius: "5px"
-}
+import { deleteTodo, editTodo } from "../Todo/TodoService"
+import ListTodos from "../Todo/ListTodos";
+import { getAllBoard, rankBoard } from "../Boards/BoardServices";
 
 const boardStyle = {
     container: {
@@ -55,68 +48,127 @@ const boardStyle = {
     }
 }
 
-export default function Boards(props) {
+const Boards = (props) => {
     const {
         board, 
         index, 
-        dragStart, 
-        dragEnter, 
-        drop, 
-        reload, 
+        handleDragStart, 
+        handleDragging,
+        handleDragEnter, 
+        handleDrop, 
         handleDragItemStart, 
+        handleDragItem,
         handleDragItemEnter, 
-        handleDragItemEnd 
+        handleDragItemEnd ,
+        handleDropItem,
+        handleDeleteBoard,
+        impactedBoard
     } = props
 
-    const handleDeleteBoard = () => {
-        deleteBoard(board.id)
+    const [data, setData] = useState(board)
+    const [boardName, setBoardName] = useState(data?.name)
+    const [listTodo, setListTodo] = useState(data?.lists)
+
+    const handleDelete = () => {
+        deleteBoard(data?.id)
         .then(res => {
             if (res.data.code === 200) {
-                reload()
+                handleDeleteBoard(data?.id)
             }
         })
         .catch(err => console.log(err))
     }
 
+    const handleSetBoardName = (value) => {
+        setBoardName(value)
+    }
+
+    const handleAddTodo = (value) => {
+        getAllBoard(data.id)
+        .then(res => {
+            setListTodo(res.data.data.lists)
+        })
+        .catch(err => console.log(err))
+    }
+
+    const handleDeleteTodo = (id) => {
+        deleteTodo(id)
+        .then(res => {
+            if (res.data.code === 200) {
+                setListTodo(listTodo.filter(todo => todo.id !== id))
+            }
+        })
+        .catch(err => console.log(err))
+    }
+
+    useEffect(() => {
+        if (impactedBoard !== null) {
+            for (let i = 0; i < impactedBoard.length; i++) {
+                if (impactedBoard[i] === board.id) {
+                    getAllBoard(impactedBoard[i])
+                    .then(res => {
+                        console.log(data.name)
+                        setData(res.data.data)
+                        setListTodo(res.data.data.lists)
+                        console.log(res.data.data)
+                    })
+                    .catch(err => console.log(err))
+                }
+            }
+        }
+    }, [impactedBoard])
+
     return (
         <>
-            <div style={boardStyle.container} data-value={board.id} ranking={board.no}>
+            <div style={boardStyle.container} data-value={data.id} ranking={data.no}>
                 <div 
                     className="board-header" 
                     style={boardStyle.header}
                     draggable
-                    onDragStart={(e) => dragStart(e, index)}
-                    onDragEnter={e => dragEnter(e, index, board.id)}
-                    onDragEnd={e => drop(e, index)}
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDrag={e => handleDragging(e)}
+                    onDragEnter={e => handleDragEnter(e, index, data?.id, data?.no)}
+                    onDragEnd={e => handleDrop(e, index)}
                 >
                     <h4 className="board-name" style={{ width: "80%" }}>
                         <EditNameTodo
-                        nameTodo={board?.name}
-                        id={board?.id}
-                        reload={() => reload()} />
+                        nameTodo={boardName}
+                        id={data?.id}
+                        setBoardName={handleSetBoardName} />
                     </h4>
-                    <Button icon={<DeleteOutlined />} size="medium" onClick={handleDeleteBoard} />
+                    <Button icon={<DeleteOutlined />} size="medium" onClick={handleDelete} />
                 </div>
-                <ul className="board-content" style={boardStyle.list}>
-                    {
-                        board?.lists && board.lists.sort((a,b) => a.no - b.no).map(todo => (
+                    {/* {
+                        listTodo && listTodo.sort((a,b) => a.no - b.no).map(todo => (
                             <EditTodo
                             key={todo.id}
                             todo={todo}
                             boardStyle={boardStyle}
-                            reload={reload}
                             onDragStart={handleDragItemStart}
                             onDragEnter={handleDragItemEnter}
                             onDragEnd={handleDragItemEnd}
-
+                            onDrag={handleDragItem}
+                            handleDeleteTodo={handleDeleteTodo}
                              />
                         ))
-                    }
-                </ul>
+                    } */}
+                    <ListTodos
+                    listTodo={listTodo}
+                    // boardStyle={boardStyle}
+                    onDragStart={handleDragItemStart}
+                    onDragEnter={handleDragItemEnter}
+                    onDragEnd={handleDragItemEnd}
+                    onDrag={handleDragItem}
+                    handleDropItem={handleDropItem}
+                    handleDeleteTodo={handleDeleteTodo}
+                     />
                 <AddTodo
-                board={board}
-                reload={reload} />
+                board={data}
+                handleAddTodo={handleAddTodo}
+                 />
             </div>
         </>
     )
 }
+
+export default React.memo(Boards)
