@@ -7,6 +7,7 @@
 .App {
   /* text-align: center; */
   height: 100vh;
+  position: relative;
 }
 
 .App-logo {
@@ -64,4 +65,37 @@
   margin: 10px 0;
   border-radius: 10px;
   cursor: grab;
+}
+
+.boardmoved {
+  position: absolute;
+  width: 300px;
+  /* height: 300px; */
+  /* background-color: red; */
+  /* top: 0; */
+  /* left: 0; */
+  z-index: 100;
+  /* background-color: rgb(235, 236, 240);
+  padding: 10px;
+  border-radius: 10px; */
+}
+
+.blankItem {
+  background-color: red;
+  padding: 20px;
+}
+
+.background-normal {
+  border-top: none;
+  border-bottom: none;
+}
+
+.border-top {
+  border-top: 5px solid #000;
+  border-bottom: none;
+}
+
+.border-bottom {
+  border-bottom: 5px solid #000;
+  border-top: none;
 }

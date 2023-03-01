@@ -15,36 +15,31 @@ export default function EditTodo(props) {
         reload, 
         onDragStart, 
         onDragEnter, 
-        onDragEnd 
+        onDragEnd,
+        onDrag,
+        handleDeleteTodo,
+        handleDropItem
     } = props
 
     const [isEdit, setIsEdit] = useState(false)
 
     const [form] = Form.useForm()
-
-    const dragItem = useRef()
-    const dragOverItem = useRef()
+    const [name, setName] = useState("")
 
     const handleSubmit = () => {
         setIsEdit(false)
         editTodo(todo.id, { name: form.getFieldValue("name")})
         .then(res => {
             if (res.data.code === 200) {
-                reload()
+                setName(res.data.data.name)
             }
         })
         .catch(err => console.log(err))
     }
 
-    const handleDeleteTodo = (id) => {
-        deleteTodo(id)
-        .then(res => {
-            if (res.data.code === 200) {
-                reload()
-            }
-        })
-        .catch(err => console.log(err))
-    }
+    useEffect(() => {
+        setName(todo.name)
+    }, [])
 
     return (
         <>
@@ -65,7 +60,7 @@ export default function EditTodo(props) {
                     message: 'Trường này là bắt buộc!'
                 }
                 ]}
-                initialValue={todo.name}
+                initialValue={name}
             >
                 <Input.TextArea size="small" autoFocus onFocus={e => e.target.setSelectionRange(e.currentTarget.value.length, e.currentTarget.value.length)}/>
                 </Form.Item>
@@ -78,13 +73,13 @@ export default function EditTodo(props) {
                 ranking={todo.no}
                 board-id={todo.board_id}
                 draggable
-                onDragStart={(e) => onDragStart(e, todo.id, todo.no)}
+                onDragStart={(e) => onDragStart(e, todo.id, todo.no, todo.board_id)}
                 onDragEnter={(e) => onDragEnter(e, todo.no, todo.board_id)}
                 onDragEnd={(e) => onDragEnd(e, todo.no, todo.board_id)}
-
+                onDrag={e => onDrag(e)}
             >
                 <p className="board-item-name" style={{width: "100%"}} onClick={() => setIsEdit(true)}>
-                    {todo.name}
+                    {name}
                 </p>
             <Button type="dashed" icon={<DeleteOutlined />} size="small" onClick={() => handleDeleteTodo(todo.id)}/>
             </li>

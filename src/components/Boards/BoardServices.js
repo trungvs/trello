@@ -3,8 +3,12 @@ import CONSTANT_LIST from "../../appConfig";
 
 const API_ENDPOINT = CONSTANT_LIST.API_PATH + "/board"
 
-export const getAllBoard = () => {
-    return axios.get(API_ENDPOINT)
+export const getAllBoard = (id) => {
+    if (id) {
+        return axios.get(API_ENDPOINT + `/${id}`)
+    } else {
+        return axios.get(API_ENDPOINT + "/0")
+    }
 }
 
 export const addBoard = (data) => {

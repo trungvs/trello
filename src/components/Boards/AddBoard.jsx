@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { CloseCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
-import { Card } from 'antd';
 import {
     Form,
     Input,
+    Card,
+    Button
   } from 'antd';
 
 import { addBoard } from "./BoardServices";
 
-export default function AddBoard({ reload })  {
+export default function AddBoard({ reload, handleAddBoard })  {
 
     const [open, setOpen] = useState(false)
     const [form] = Form.useForm()
@@ -18,8 +18,7 @@ export default function AddBoard({ reload })  {
         addBoard(values)
         .then(res => {
             if (res.data.code === 200) {
-                console.log("thanh cong")
-                reload()
+                handleAddBoard(res.data.data)
             }
         })
         .catch(err => console.log(err))
@@ -38,7 +37,7 @@ export default function AddBoard({ reload })  {
                     message: 'Trường này là bắt buộc!'
                 }
                 ]}>
-                    <Input allowClear size="large" />
+                    <Input allowClear autoFocus size="large" />
                 </Form.Item>
                     <Button type="primary" htmlType="submit" size="large" style={{ marginRight: "10px" }}>
                     Thêm mới

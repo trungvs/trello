@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Card, Space } from 'antd';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Space } from 'antd';
 import Boards from "../Boards/Boards";
 import AddBoard from "../Boards/AddBoard";
 
@@ -17,43 +17,83 @@ export default function Content() {
     const [itemSelected, setItemSelected] = useState(null)
     const [newBoard, setNewBoard] = useState(null)
 
+    const [impactedBoard, setImpactedBoard] = useState(null)
+    const [currentBoard, setCurrentBoard] = useState(null)
+
+    let draggedItem = undefined
+    let itemEnter = undefined
+
+    let leftBounding = null
+    let rightBounding = null
+    let topBounding = null
+    let bottomBounding = null
+    let centerBounding = null
 
     const handleDragStart = (e, position) => {
+        e.stopPropagation()
         dragItem.current = position;
+
+        // set data to transfer
         e.dataTransfer.dropEffect = "move";
         e.dataTransfer.setData("text/html", e.target.parentNode.parentNode);
-        e.dataTransfer.setDragImage(e.target.parentNode, 20, 20);
+        e.dataTransfer.setDragImage(new Image(), 20, 20);
+
+        // clone moved element and append it to DOM
+        draggedItem = document.createElement("div")
+        draggedItem.classList.add("boardmoved")
+        draggedItem.style.position = "absolute"
+        draggedItem.append(e.target.parentNode.parentNode.cloneNode(true))
+        document.body.append(draggedItem)
+
+        // get curent ranking and its value 
+        setCurrentRanking(e.target.parentNode.getAttribute("ranking"))
+        setItemSelected(e.target.parentNode.getAttribute("data-value"))
+
+        // set style for clone and real element
         setTimeout(() => {
+            handleMoveAt(e)
             e.target.parentNode.parentNode.style = "background-color: #ccc; width: 300px; border-radius: 10px; padding: 10px";
             e.target.parentNode.style = "visibility: hidden; padding: 10px"
         }, 0)
-        setCurrentRanking(e.target.parentNode.getAttribute("ranking"))
-        setItemSelected(e.target.parentNode.getAttribute("data-value"))
+        e.stopPropagation()
     }
 
-    const handleDragEnter = (e, position, board_id) => {
+    const handleOnDrag = (e) => {
+        handleMoveAt(e)
+    }
+
+    const handleDragEnter = (e, position, board_id, ranking) => {
+        e.stopPropagation()
         dragOverItem.current = position;
-        setNewRanking(e.target.parentNode.getAttribute("ranking") || e.target.parentNode.parentNode.parentNode.getAttribute("ranking"))
+        setNewRanking(ranking)
         setNewBoard(board_id)
-        console.log(e.target.parentNode.getAttribute("ranking"), newRanking)
+        console.log("newranking", board_id, ranking)
     }
 
     const handleDrop = (e) => {
+        e.stopPropagation()
+        document.body.querySelector(".boardmoved").remove()
+        draggedItem = undefined
         e.target.parentNode.parentNode.style = "background-color: rgb(235, 236, 240); width: 300px; border-radius: 10px; padding: 10px";
         e.target.parentNode.style = "visibility: none"
 
         if (newRanking !== null && dragOverItem.current !== null) {
+            // update list board
             const copyListItems = [...listBoard];
             const dragItemContent = copyListItems[dragItem.current];
             copyListItems.splice(dragItem.current, 1);
             copyListItems.splice(dragOverItem.current, 0, dragItemContent); 
+            
+
             dragItem.current = null;
             dragOverItem.current = null;
+
             setListBoard(copyListItems);
             rankBoard(itemSelected, {currentRanking, newRanking})
             .then(res => {
                 if (res.data.code === 200) {
-                    handleReload()
+                    // handleReload()
+                    console.log("thanh cong")
                 }
             })
             .catch(err => console.log(err))
@@ -62,56 +102,141 @@ export default function Content() {
             dragOverItem.current = null;
             handleReload()
         }
-    };
+        e.stopPropagation()
+    }
+
+    const handleMoveAt = (e) => {
+        document.querySelector(".boardmoved").style.left = (e.pageX - document.querySelector(".boardmoved").offsetWidth / 4) + "px" 
+        document.querySelector(".boardmoved").style.top = e.pageY + "px"
+    }
 
     const handleReload = () => {
         setReload(!reload)
     }
 
-    const handleDragItemStart = (e, id, ranking) => {
+    const handleSetBounding = e => {
+        leftBounding = e.target.getBoundingClientRect().left
+        rightBounding = e.target.getBoundingClientRect().right
+        topBounding = e.target.getBoundingClientRect().top
+        bottomBounding = e.target.getBoundingClientRect().bottom
+        centerBounding = topBounding + (bottomBounding - topBounding) / 2
+    }
+
+    const handleDragItemStart = (e, id, ranking, board_id) => {
+        e.stopPropagation()
         e.dataTransfer.setData("text/html", e.target)
         e.dataTransfer.setDragImage(e.target, 20, 20)
+
         setTimeout(() => {
             e.target.classList.add("hidden-todo")
-
             for (let i = 0; i < e.target.childNodes.length; i ++) {
                 e.target.childNodes[i].style = "visibility: hidden"
             }
         }, 0)
         setItemSelected(id)
         setCurrentRanking(ranking)
-        console.log(e.target.childNodes)
+        setCurrentBoard(board_id)
+        handleSetBounding(e)
     }
 
     const handleDragItemEnter = (e, ranking, board_id) => {
+        e.stopPropagation()
+        itemEnter = e.target.getAttribute("data-value") ? e.target : e.target.parentNode
+        handleRemoveBorder()
+        
         setNewRanking(ranking)
         setNewBoard(board_id)
-        console.log("enter", ranking, board_id)
+        handleSetBounding(e)
+
+        if (document.querySelector(".background-blue")) {
+            itemEnter.classList.remove("background-blue")
+        } else if (document.querySelector(".background-red")) {
+            itemEnter.classList.remove("background-red")
+        }
+    }
+    
+    const handleDragItem = (e) => {
+        e.stopPropagation()
+        let mouseX = e.clientX
+        let mouseY = e.clientY
+        if (centerBounding >= mouseY && mouseY >= topBounding && leftBounding < mouseX && mouseX < rightBounding) {
+            if (newBoard === currentBoard) {
+                setNewRanking(newRanking - 1)
+            }
+            if (document.querySelector(".border-bottom")) {
+                itemEnter.classList.remove("border-bottom")
+            }
+            itemEnter.classList.add("border-top")
+
+        } else if (centerBounding < mouseY && mouseY < bottomBounding && leftBounding <= mouseX && mouseX <= rightBounding) {
+            if (newBoard !== currentBoard) {
+                setNewRanking(newRanking + 1)
+            }
+            if (document.querySelector(".border-top")) {
+                itemEnter.classList.remove("border-top")
+            }
+            itemEnter.classList.add("border-bottom")
+        } 
     }
 
     const handleDragItemEnd = (e, ranking, board_id) => {
+        e.stopPropagation()
+        e.preventDefault()
+        document.style = "border-top: none"
         e.target.classList.remove("hidden-todo")
+
         for (let i = 0; i < e.target.childNodes.length; i ++) {
             e.target.childNodes[i].style = "visibility: none"
         }
-        console.log(ranking, board_id)
-        console.log({
-            id: itemSelected,
-            currentRanking: currentRanking,
-            newRanking: newRanking,
-            newBoard: newBoard
-        })
         rankTodo(itemSelected, {
-        currentRanking,
-        newRanking,
-        board_id: newBoard
+            currentRanking,
+            newRanking,
+            board_id: newBoard
         })  
         .then(res => {
             if (res.data.code === 200) {
-                handleReload()
+                setImpactedBoard([newBoard, currentBoard])
             }
         })
         .catch(err => console.log(err))
+        handleRemoveBorder()
+    }
+
+    const handleDropItem = (e, ranking, board_id) => {
+        console.log(e, ranking, board_id)
+        itemEnter = e.target.getAttribute("data-value") ? e.target : e.target.parentNode
+        handleRemoveBorder()
+        
+        setNewRanking(ranking)
+        setNewBoard(board_id)
+        handleSetBounding(e)
+    }
+
+    const handleRemoveBorder = () => {
+        let borderTop = document.querySelectorAll(".border-top")
+
+        if (borderTop.length !== 0) {
+            for (let i = 0; i < borderTop.length; i++) {
+                borderTop[i].classList.remove("border-top")
+            }
+        }
+
+        let borderBottom = document.querySelectorAll(".border-bottom")
+
+        if (borderBottom.length !== 0) {
+            for (let i = 0; i < borderBottom.length; i++) {
+                borderBottom[i].classList.remove("border-bottom")
+            }
+        }
+    }
+
+    const handleAddBoard  = (value) => {
+        setListBoard(prev => [...prev, value])
+    }
+
+    const handleDeleteBoard = (id) => {
+        console.log(id)
+        setListBoard(listBoard.filter(board => board.id !== id))
     }
 
     useEffect(() => {
@@ -120,24 +245,8 @@ export default function Content() {
             setListBoard(res.data.data)
         })
         .catch(err => console.log(err))
-    }, [reload])
-
-    const handleSetNew = (itemSelected, currentRanking, newRanking, newBoard) => {
-        console.log(itemSelected)
-        if (itemSelected?.board_id === newBoard) {
-            if (currentRanking > newRanking) {
-                let listSelected = listBoard.filter(list => list.id === newBoard)
-                let listTodos = listSelected.lists[0]
-                listTodos = listTodos.map(todo => todo.no >= newRanking ? {...todo, no: todo.no +1} : todo)
-                listTodos = listTodos.map(todo => todo.id === itemSelected.id ? {...todo, no: newRanking} : todo)
-                listSelected = {
-                    ...listSelected,
-                    lists: listTodos
-                }
-                setListBoard(listBoard.map(board => board.id === listSelected.id ? listSelected : board))
-            }
-        }
-    }   
+        console.log("re-render")
+    }, [reload])  
 
     return (
         <>
@@ -150,18 +259,26 @@ export default function Content() {
                         key={board.id}
                         board={board}
                         index={index}
-                        dragStart={handleDragStart}
-                        dragEnter={handleDragEnter}
-                        drop={handleDrop} 
+                        handleDragStart={handleDragStart}
+                        handleDragging={handleOnDrag}
+                        handleDragEnter={handleDragEnter}
+                        handleDrop={handleDrop} 
                         reload={handleReload}
                         handleDragItemStart={handleDragItemStart}
+                        handleDragItem={handleDragItem}
                         handleDragItemEnter={handleDragItemEnter}
                         handleDragItemEnd={handleDragItemEnd}
+                        handleDropItem={handleDropItem}
+                        handleDeleteBoard={handleDeleteBoard}
+                        impactedBoard={impactedBoard}
                         />
                     )
                 })
             }
-            <AddBoard reload={handleReload} />
+            <AddBoard 
+            reload={handleReload}
+            handleAddBoard={handleAddBoard}
+             />
         </Space>
         </>
     )
