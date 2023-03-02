@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
+import React, { useState, useImperativeHandle } from "react";
 import { Button } from 'antd';
 import { DeleteOutlined } from "@ant-design/icons";
 
@@ -6,9 +6,9 @@ import AddTodo from "../Todo/AddTodo";
 import EditNameTodo from "./EditBoardName";
 
 import { deleteBoard } from "./BoardServices";
-import { deleteTodo, editTodo } from "../Todo/TodoService"
+import { deleteTodo } from "../Todo/TodoService"
 import ListTodos from "../Todo/ListTodos";
-import { getAllBoard, rankBoard } from "../Boards/BoardServices";
+import { getAllBoard } from "../Boards/BoardServices";
 
 const boardStyle = {
     container: {
@@ -48,7 +48,7 @@ const boardStyle = {
     }
 }
 
-const Boards = (props) => {
+const Boards = (props, ref) => {
     const {
         board, 
         index, 
@@ -62,7 +62,6 @@ const Boards = (props) => {
         handleDragItemEnd ,
         handleDropItem,
         handleDeleteBoard,
-        impactedBoard
     } = props
 
     const [data, setData] = useState(board)
@@ -101,22 +100,19 @@ const Boards = (props) => {
         .catch(err => console.log(err))
     }
 
-    useEffect(() => {
-        if (impactedBoard !== null) {
-            for (let i = 0; i < impactedBoard.length; i++) {
-                if (impactedBoard[i] === board.id) {
-                    getAllBoard(impactedBoard[i])
-                    .then(res => {
-                        console.log(data.name)
-                        setData(res.data.data)
-                        setListTodo(res.data.data.lists)
-                        console.log(res.data.data)
-                    })
-                    .catch(err => console.log(err))
+    useImperativeHandle(ref, () => ({
+        handleGetData() {
+            console.log(data.name)
+            getAllBoard()
+            .then(res => {
+                if (res.data.code === 200){
+                    const selectedBoard = res.data.data.find(b => b.id === data.id)
+                    setData(selectedBoard)
+                    setListTodo(selectedBoard.lists)
                 }
-            }
+            })
         }
-    }, [impactedBoard])
+    }))
 
     return (
         <>
@@ -138,23 +134,8 @@ const Boards = (props) => {
                     </h4>
                     <Button icon={<DeleteOutlined />} size="medium" onClick={handleDelete} />
                 </div>
-                    {/* {
-                        listTodo && listTodo.sort((a,b) => a.no - b.no).map(todo => (
-                            <EditTodo
-                            key={todo.id}
-                            todo={todo}
-                            boardStyle={boardStyle}
-                            onDragStart={handleDragItemStart}
-                            onDragEnter={handleDragItemEnter}
-                            onDragEnd={handleDragItemEnd}
-                            onDrag={handleDragItem}
-                            handleDeleteTodo={handleDeleteTodo}
-                             />
-                        ))
-                    } */}
                     <ListTodos
                     listTodo={listTodo}
-                    // boardStyle={boardStyle}
                     onDragStart={handleDragItemStart}
                     onDragEnter={handleDragItemEnter}
                     onDragEnd={handleDragItemEnd}
@@ -171,4 +152,4 @@ const Boards = (props) => {
     )
 }
 
-export default React.memo(Boards)
+export default React.forwardRef(Boards)

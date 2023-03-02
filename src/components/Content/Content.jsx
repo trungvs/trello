@@ -17,8 +17,9 @@ export default function Content() {
     const [itemSelected, setItemSelected] = useState(null)
     const [newBoard, setNewBoard] = useState(null)
 
-    const [impactedBoard, setImpactedBoard] = useState(null)
     const [currentBoard, setCurrentBoard] = useState(null)
+
+    const boardRef= useRef([])
 
     let draggedItem = undefined
     let itemEnter = undefined
@@ -55,7 +56,6 @@ export default function Content() {
             e.target.parentNode.parentNode.style = "background-color: #ccc; width: 300px; border-radius: 10px; padding: 10px";
             e.target.parentNode.style = "visibility: hidden; padding: 10px"
         }, 0)
-        e.stopPropagation()
     }
 
     const handleOnDrag = (e) => {
@@ -67,7 +67,6 @@ export default function Content() {
         dragOverItem.current = position;
         setNewRanking(ranking)
         setNewBoard(board_id)
-        console.log("newranking", board_id, ranking)
     }
 
     const handleDrop = (e) => {
@@ -92,7 +91,6 @@ export default function Content() {
             rankBoard(itemSelected, {currentRanking, newRanking})
             .then(res => {
                 if (res.data.code === 200) {
-                    // handleReload()
                     console.log("thanh cong")
                 }
             })
@@ -102,7 +100,6 @@ export default function Content() {
             dragOverItem.current = null;
             handleReload()
         }
-        e.stopPropagation()
     }
 
     const handleMoveAt = (e) => {
@@ -195,7 +192,11 @@ export default function Content() {
         })  
         .then(res => {
             if (res.data.code === 200) {
-                setImpactedBoard([newBoard, currentBoard])
+                const currentBoardIndex = listBoard.findIndex(b => b.id === currentBoard)
+                const newBoardIndex = listBoard.findIndex(b => b.id === newBoard)
+                boardRef.current[currentBoardIndex].handleGetData()
+                boardRef.current[newBoardIndex].handleGetData()
+                console.log(boardRef.current)
             }
         })
         .catch(err => console.log(err))
@@ -245,7 +246,6 @@ export default function Content() {
             setListBoard(res.data.data)
         })
         .catch(err => console.log(err))
-        console.log("re-render")
     }, [reload])  
 
     return (
@@ -253,7 +253,6 @@ export default function Content() {
         <Space direction="horizontal" size={16} style={{display: "flex", alignItems: "flex-start", marginTop: "30px", position: "relative"}}>
             {
                 listBoard && listBoard.map((board, index) => {
-
                     return (
                         <Boards
                         key={board.id}
@@ -270,7 +269,7 @@ export default function Content() {
                         handleDragItemEnd={handleDragItemEnd}
                         handleDropItem={handleDropItem}
                         handleDeleteBoard={handleDeleteBoard}
-                        impactedBoard={impactedBoard}
+                        ref={board => boardRef.current[index] = board}
                         />
                     )
                 })

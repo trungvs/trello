@@ -21,6 +21,7 @@ export default function EditBoardName(props) {
         editBoard(id, { name: form.getFieldValue("name")})
         .then(res => {
             if (res.data.code === 200) {
+                console.log(res.data.data)
                 setName(res.data.data.name)
             }
         })
