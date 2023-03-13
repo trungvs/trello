@@ -41,21 +41,29 @@ export default function EditBoardName(props) {
                   handleSubmit(form.values)
                 }
               }} onBlur={() => handleSubmit(form.values)}>
-            <Form.Item name="name" style={{ marginBottom: 0}} rules={[
-            {
-                required: true,
-                message: 'Trường này là bắt buộc!'
-            }
-            ]}
-            initialValue={name}
-            >
-                <Input size="large" autoFocus ref={inputRef} onFocus={e => e.target.setSelectionRange(e.currentTarget.value.length, e.currentTarget.value.length)} />
-            </Form.Item>
-                </Form>
-            : <span style={{ display: "block", width: "100%" }} onClick={() => {
-                setIsEdit(true)
-                // setRender(!render)
-            }}>{name}</span>
+                <Form.Item name="name" style={{ marginBottom: 0}} rules={[
+                {
+                    required: true,
+                    message: 'Trường này là bắt buộc!'
+                }
+                ]}
+                initialValue={name}
+                >
+                    <Input 
+                        size="large" 
+                        autoFocus 
+                        ref={inputRef} 
+                        onFocus={e => e.target.setSelectionRange(e.currentTarget.value.length, e.currentTarget.value.length)} 
+                    />
+                </Form.Item>
+            </Form>
+            : <span 
+                style={{ display: "block", width: "100%", cursor: "text" }} 
+                onClick={() => {
+                    setIsEdit(true)
+                }}>
+                {name}
+            </span>
         }
         </>
     )

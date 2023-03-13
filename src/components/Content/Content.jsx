@@ -6,19 +6,17 @@ import AddBoard from "../Boards/AddBoard";
 import { getAllBoard, rankBoard } from "../Boards/BoardServices";
 import { rankTodo } from "../Todo/TodoService";
 
-export default function Content() {
+function Content() {
     const [listBoard, setListBoard] = useState([])
     const dragItem = useRef(null)
     const dragOverItem = useRef(null)
     const [reload, setReload] = useState(false)
 
-    const [currentRanking, setCurrentRanking] = useState(null)
-    const [newRanking, setNewRanking] = useState(null)
-    const [itemSelected, setItemSelected] = useState(null)
-    const [newBoard, setNewBoard] = useState(null)
-
-    const [currentBoard, setCurrentBoard] = useState(null)
-
+    const currentRanking = useRef(null)
+    const newRanking = useRef(null)
+    const itemSelected = useRef(null)
+    const newBoard = useRef(null)
+    const currentBoard = useRef(null)
     const boardRef= useRef([])
 
     let draggedItem = undefined
@@ -47,8 +45,10 @@ export default function Content() {
         document.body.append(draggedItem)
 
         // get curent ranking and its value 
-        setCurrentRanking(e.target.parentNode.getAttribute("ranking"))
-        setItemSelected(e.target.parentNode.getAttribute("data-value"))
+        // setCurrentRanking(e.target.parentNode.getAttribute("ranking"))
+        // setItemSelected(e.target.parentNode.getAttribute("data-value"))
+        currentRanking.current  = e.target.parentNode.getAttribute("ranking")
+        itemSelected.current = e.target.parentNode.getAttribute("data-value")
 
         // set style for clone and real element
         setTimeout(() => {
@@ -65,8 +65,10 @@ export default function Content() {
     const handleDragEnter = (e, position, board_id, ranking) => {
         e.stopPropagation()
         dragOverItem.current = position;
-        setNewRanking(ranking)
-        setNewBoard(board_id)
+        // setNewRanking(ranking)
+        // setNewBoard(board_id)
+        newRanking.current = ranking
+        newBoard.current = board_id
     }
 
     const handleDrop = (e) => {
@@ -88,7 +90,7 @@ export default function Content() {
             dragOverItem.current = null;
 
             setListBoard(copyListItems);
-            rankBoard(itemSelected, {currentRanking, newRanking})
+            rankBoard(itemSelected.current, {currentRanking: currentRanking.current, newRanking: newRanking.current})
             .then(res => {
                 if (res.data.code === 200) {
                     console.log("thanh cong")
@@ -112,10 +114,11 @@ export default function Content() {
     }
 
     const handleSetBounding = e => {
-        leftBounding = e.target.getBoundingClientRect().left
-        rightBounding = e.target.getBoundingClientRect().right
-        topBounding = e.target.getBoundingClientRect().top
-        bottomBounding = e.target.getBoundingClientRect().bottom
+        const bounding = e.target.getBoundingClientRect()
+        leftBounding = bounding.left
+        rightBounding = bounding.right
+        topBounding = bounding.top
+        bottomBounding = bounding.bottom
         centerBounding = topBounding + (bottomBounding - topBounding) / 2
     }
 
@@ -130,49 +133,101 @@ export default function Content() {
                 e.target.childNodes[i].style = "visibility: hidden"
             }
         }, 0)
-        setItemSelected(id)
-        setCurrentRanking(ranking)
-        setCurrentBoard(board_id)
+        // setItemSelected(id)
+        // setCurrentRanking(ranking)
+        // setCurrentBoard(board_id)
+        itemSelected.current = id
+        currentRanking.current = ranking
+        currentBoard.current = board_id
         handleSetBounding(e)
     }
 
     const handleDragItemEnter = (e, ranking, board_id) => {
+        console.log("enter")
         e.stopPropagation()
         itemEnter = e.target.getAttribute("data-value") ? e.target : e.target.parentNode
-        handleRemoveBorder()
         
-        setNewRanking(ranking)
-        setNewBoard(board_id)
+        // setNewRanking(ranking)
+        // setNewBoard(board_id)
+        newRanking.current = ranking
+        newBoard.current = board_id
         handleSetBounding(e)
-
-        if (document.querySelector(".background-blue")) {
-            itemEnter.classList.remove("background-blue")
-        } else if (document.querySelector(".background-red")) {
-            itemEnter.classList.remove("background-red")
-        }
-    }
-    
-    const handleDragItem = (e) => {
-        e.stopPropagation()
         let mouseX = e.clientX
         let mouseY = e.clientY
-        if (centerBounding >= mouseY && mouseY >= topBounding && leftBounding < mouseX && mouseX < rightBounding) {
-            if (newBoard === currentBoard) {
-                setNewRanking(newRanking - 1)
+        if (
+            centerBounding >= mouseY 
+            && mouseY >= topBounding 
+            && leftBounding <= mouseX 
+            && mouseX <= rightBounding
+        ) {
+            if (newBoard.current === currentBoard.current) {
+                // setNewRanking(newRanking - 1)
+                newRanking.current = newRanking.current - 1
             }
             if (document.querySelector(".border-bottom")) {
                 itemEnter.classList.remove("border-bottom")
             }
-            itemEnter.classList.add("border-top")
+            if (!document.querySelector(".border-top")) {
+                itemEnter.classList.add("border-top")
+            }
 
-        } else if (centerBounding < mouseY && mouseY < bottomBounding && leftBounding <= mouseX && mouseX <= rightBounding) {
-            if (newBoard !== currentBoard) {
-                setNewRanking(newRanking + 1)
+        } else if (
+            centerBounding < mouseY
+            && mouseY < bottomBounding
+            && leftBounding <= mouseX
+            && mouseX <= rightBounding
+        ) {
+            if (newBoard.current !== currentBoard.current) {
+                // setNewRanking(newRanking + 1)
+                newRanking.current = newRanking.current + 1
             }
             if (document.querySelector(".border-top")) {
                 itemEnter.classList.remove("border-top")
             }
-            itemEnter.classList.add("border-bottom")
+            if (!document.querySelector(".border-bottom")) {
+                itemEnter.classList.add("border-bottom")
+            }
+        } 
+    }
+    
+    const handleDragItem = (e) => {
+        e.stopPropagation()
+        handleRemoveBorder()
+        let mouseX = e.clientX
+        let mouseY = e.clientY
+        if (
+            centerBounding >= mouseY 
+            && mouseY >= topBounding 
+            && leftBounding <= mouseX 
+            && mouseX <= rightBounding
+        ) {
+            if (newBoard.current === currentBoard.current) {
+                // setNewRanking(newRanking - 1)
+                newRanking.current = newRanking.current - 1
+            }
+            if (document.querySelector(".border-bottom")) {
+                itemEnter.classList.remove("border-bottom")
+            }
+            if (!document.querySelector(".border-top")) {
+                itemEnter.classList.add("border-top")
+            }
+
+        } else if (
+            centerBounding < mouseY
+            && mouseY < bottomBounding
+            && leftBounding <= mouseX
+            && mouseX <= rightBounding
+        ) {
+            if (newBoard.current !== currentBoard.current) {
+                // setNewRanking(newRanking + 1)
+                newRanking.current = newRanking.current + 1
+            }
+            if (document.querySelector(".border-top")) {
+                itemEnter.classList.remove("border-top")
+            }
+            if (!document.querySelector(".border-bottom")) {
+                itemEnter.classList.add("border-bottom")
+            }
         } 
     }
 
@@ -185,21 +240,22 @@ export default function Content() {
         for (let i = 0; i < e.target.childNodes.length; i ++) {
             e.target.childNodes[i].style = "visibility: none"
         }
-        rankTodo(itemSelected, {
-            currentRanking,
-            newRanking,
-            board_id: newBoard
+
+        rankTodo(itemSelected.current, {
+            currentRanking: currentRanking.current,
+            newRanking: newRanking.current,
+            board_id: newBoard.current
         })  
-        .then(res => {
-            if (res.data.code === 200) {
-                const currentBoardIndex = listBoard.findIndex(b => b.id === currentBoard)
-                const newBoardIndex = listBoard.findIndex(b => b.id === newBoard)
-                boardRef.current[currentBoardIndex].handleGetData()
-                boardRef.current[newBoardIndex].handleGetData()
-                console.log(boardRef.current)
-            }
-        })
-        .catch(err => console.log(err))
+            .then(res => {
+                if (res.data.code === 200) {
+                    const currentBoardIndex = listBoard.findIndex(b => b.id === currentBoard.current)
+                    const newBoardIndex = listBoard.findIndex(b => b.id === newBoard.current)
+                    boardRef.current[currentBoardIndex].handleGetData()
+                    boardRef.current[newBoardIndex].handleGetData()
+                }
+            })
+            .catch(err => console.log(err))
+
         handleRemoveBorder()
     }
 
@@ -208,8 +264,10 @@ export default function Content() {
         itemEnter = e.target.getAttribute("data-value") ? e.target : e.target.parentNode
         handleRemoveBorder()
         
-        setNewRanking(ranking)
-        setNewBoard(board_id)
+        // setNewRanking(ranking)
+        // setNewBoard(board_id)
+        newRanking.current = ranking
+        newBoard.current = board_id
         handleSetBounding(e)
     }
 
@@ -250,35 +308,38 @@ export default function Content() {
 
     return (
         <>
-        <Space direction="horizontal" size={16} style={{display: "flex", alignItems: "flex-start", marginTop: "30px", position: "relative"}}>
+        <Space
+            direction="horizontal"
+            size={16}
+            style={{display: "flex", alignItems: "flex-start", marginTop: "30px", position: "relative"}}
+        >
             {
                 listBoard && listBoard.map((board, index) => {
                     return (
                         <Boards
-                        key={board.id}
-                        board={board}
-                        index={index}
-                        handleDragStart={handleDragStart}
-                        handleDragging={handleOnDrag}
-                        handleDragEnter={handleDragEnter}
-                        handleDrop={handleDrop} 
-                        reload={handleReload}
-                        handleDragItemStart={handleDragItemStart}
-                        handleDragItem={handleDragItem}
-                        handleDragItemEnter={handleDragItemEnter}
-                        handleDragItemEnd={handleDragItemEnd}
-                        handleDropItem={handleDropItem}
-                        handleDeleteBoard={handleDeleteBoard}
-                        ref={board => boardRef.current[index] = board}
+                            key={board.id}
+                            board={board}
+                            index={index}
+                            handleDragStart={handleDragStart}
+                            handleDragging={handleOnDrag}
+                            handleDragEnter={handleDragEnter}
+                            handleDrop={handleDrop} 
+                            reload={handleReload}
+                            handleDragItemStart={handleDragItemStart}
+                            handleDragItem={handleDragItem}
+                            handleDragItemEnter={handleDragItemEnter}
+                            handleDragItemEnd={handleDragItemEnd}
+                            handleDropItem={handleDropItem}
+                            handleDeleteBoard={handleDeleteBoard}
+                            ref={board => boardRef.current[index] = board}
                         />
                     )
                 })
             }
-            <AddBoard 
-            reload={handleReload}
-            handleAddBoard={handleAddBoard}
-             />
+            <AddBoard reload={handleReload} handleAddBoard={handleAddBoard} />
         </Space>
         </>
     )
 }
+
+export default React.memo(Content)

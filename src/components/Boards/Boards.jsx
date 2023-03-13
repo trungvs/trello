@@ -1,10 +1,8 @@
 import React, { useState, useImperativeHandle } from "react";
-import { Button } from 'antd';
+import { Button, message, Popconfirm } from 'antd';
 import { DeleteOutlined } from "@ant-design/icons";
-
 import AddTodo from "../Todo/AddTodo";
 import EditNameTodo from "./EditBoardName";
-
 import { deleteBoard } from "./BoardServices";
 import { deleteTodo } from "../Todo/TodoService"
 import ListTodos from "../Todo/ListTodos";
@@ -69,13 +67,16 @@ const Boards = (props, ref) => {
     const [listTodo, setListTodo] = useState(data?.lists)
 
     const handleDelete = () => {
-        deleteBoard(data?.id)
-        .then(res => {
-            if (res.data.code === 200) {
-                handleDeleteBoard(data?.id)
-            }
-        })
-        .catch(err => console.log(err))
+        // let answer = window.confirm("Are you sure to delete it?");
+        // if (answer) {
+            deleteBoard(data?.id)
+            .then(res => {
+                if (res.data.code === 200) {
+                    handleDeleteBoard(data?.id)
+                }
+            })
+            .catch(err => console.log(err))
+        // }
     }
 
     const handleSetBoardName = (value) => {
@@ -91,13 +92,16 @@ const Boards = (props, ref) => {
     }
 
     const handleDeleteTodo = (id) => {
-        deleteTodo(id)
-        .then(res => {
-            if (res.data.code === 200) {
-                setListTodo(listTodo.filter(todo => todo.id !== id))
-            }
-        })
-        .catch(err => console.log(err))
+        // let answer = window.confirm("Are you sure to delete it?");
+        // if (answer) {
+            deleteTodo(id)
+            .then(res => {
+                if (res.data.code === 200) {
+                    setListTodo(listTodo.filter(todo => todo.id !== id))
+                }
+            })
+            .catch(err => console.log(err))
+        // }
     }
 
     useImperativeHandle(ref, () => ({
@@ -116,6 +120,7 @@ const Boards = (props, ref) => {
 
     return (
         <>
+
             <div style={boardStyle.container} data-value={data.id} ranking={data.no}>
                 <div 
                     className="board-header" 
@@ -132,9 +137,17 @@ const Boards = (props, ref) => {
                         id={data?.id}
                         setBoardName={handleSetBoardName} />
                     </h4>
-                    <Button icon={<DeleteOutlined />} size="medium" onClick={handleDelete} />
+                    <Popconfirm
+                        placement="topLeft"
+                        title={"Are you sure to delete this task?"}
+                        onConfirm={handleDelete}
+                        okText="Yes"
+                        cancelText="No"
+                    >
+                        <Button icon={<DeleteOutlined />} size="medium" />
+                    </Popconfirm>
                 </div>
-                    <ListTodos
+                <ListTodos
                     listTodo={listTodo}
                     onDragStart={handleDragItemStart}
                     onDragEnter={handleDragItemEnter}
@@ -142,7 +155,7 @@ const Boards = (props, ref) => {
                     onDrag={handleDragItem}
                     handleDropItem={handleDropItem}
                     handleDeleteTodo={handleDeleteTodo}
-                     />
+                />
                 <AddTodo
                 board={data}
                 handleAddTodo={handleAddTodo}

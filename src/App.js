@@ -5,8 +5,10 @@ import HeaderComponent from './components/Header/Header';
 import ContentComponent from './components/Content/Content';
 
 import { Layout, Space } from 'antd';
+
 const { Header, Footer, Sider, Content } = Layout;
 const maxHeight = "calc(100vh - 64px)"
+
 const headerStyle = {
   // textAlign: 'center',
   color: '#fff',
@@ -15,14 +17,14 @@ const headerStyle = {
   lineHeight: '64px',
   backgroundColor: '#ccc',
 };
+
 const contentStyle = {
   padding: "0 10px",
   height: maxHeight,
   backgroundColor: '#fff',
   overflow: "scroll",
   display: "flex",
-  alignItems: "flex-start"
-  
+  alignItems: "flex-start" 
 };
 const siderStyle = {
   textAlign: 'center',
@@ -39,16 +41,16 @@ const footerStyle = {
 function App() {
   return (
     <div className="App">
-<Space
-    direction="vertical"
-    style={{
-      width: '100%',
-      // display: "flex",
-      // alignItems: "flex-start"
-    }}
-    size={[0, 48]}
-  >
-    <Layout>
+      <Space
+        direction="vertical"
+        style={{
+          width: '100%',
+          // display: "flex",
+          // alignItems: "flex-start"
+        }}
+        size={[0, 48]}
+      >
+        <Layout>
       <Header style={headerStyle}><HeaderComponent /></Header>
       <Layout>
         <Content style={contentStyle}><ContentComponent /></Content>

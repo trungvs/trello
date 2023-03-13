@@ -5,20 +5,19 @@ import {
   } from 'antd';
   import { Button } from 'antd';
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { message, Popconfirm } from 'antd';
 
 import { editTodo, deleteTodo, rankTodo } from "./TodoService"
 
-export default function EditTodo(props) {
+function EditTodo(props) {
     const { 
         todo, 
         boardStyle, 
-        reload, 
         onDragStart, 
         onDragEnter, 
         onDragEnd,
         onDrag,
         handleDeleteTodo,
-        handleDropItem
     } = props
 
     const [isEdit, setIsEdit] = useState(false)
@@ -62,7 +61,11 @@ export default function EditTodo(props) {
                 ]}
                 initialValue={name}
             >
-                <Input.TextArea size="small" autoFocus onFocus={e => e.target.setSelectionRange(e.currentTarget.value.length, e.currentTarget.value.length)}/>
+                <Input.TextArea 
+                    size="small" 
+                    autoFocus 
+                    onFocus={e => e.target.setSelectionRange(e.currentTarget.value.length, e.currentTarget.value.length)}
+                />
                 </Form.Item>
             </Form>
             : <li 
@@ -76,14 +79,25 @@ export default function EditTodo(props) {
                 onDragStart={(e) => onDragStart(e, todo.id, todo.no, todo.board_id)}
                 onDragEnter={(e) => onDragEnter(e, todo.no, todo.board_id)}
                 onDragEnd={(e) => onDragEnd(e, todo.no, todo.board_id)}
+                onDragOver={e => e.preventDefault()}
                 onDrag={e => onDrag(e)}
             >
-                <p className="board-item-name" style={{width: "100%"}} onClick={() => setIsEdit(true)}>
+                <p className="board-item-name" style={{width: "100%", cursor: "text"}} onClick={() => setIsEdit(true)}>
                     {name}
                 </p>
-            <Button type="dashed" icon={<DeleteOutlined />} size="small" onClick={() => handleDeleteTodo(todo.id)}/>
+                <Popconfirm
+                placement="topLeft"
+                title={"Are you sure to delete this task?"}
+                onConfirm={() => handleDeleteTodo(todo.id)}
+                okText="Yes"
+                cancelText="No"
+                >
+                    <Button type="dashed" icon={<DeleteOutlined />} size="small" />
+                </Popconfirm>
             </li>
         }
         </>
     )
 }
+
+export default React.memo(EditTodo)

@@ -38,11 +38,11 @@ const boardStyle = {
         padding: "10px",
         borderRadius: "10px",
         transition: "transform 0.3s",
-        cursor: "grab",
+        cursor: "move",
     }
 }
 
-export default function ListTodos(props) {
+function ListTodos(props) {
 
     const { 
         listTodo, 
@@ -81,3 +81,5 @@ export default function ListTodos(props) {
         </ul>
     )
 }
+
+export default React.memo(ListTodos)
