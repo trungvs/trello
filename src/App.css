@@ -93,9 +93,11 @@
 .border-top {
   border-top: 5px solid #000;
   border-bottom: none;
+  transition: all 0.2s;
 }
 
 .border-bottom {
   border-bottom: 5px solid #000;
   border-top: none;
+  transition: all 0.2s;
 }
